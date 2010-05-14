@@ -1,0 +1,14 @@
+I have removed many files that are not needed to use curl, including docs and tests. If you want these, they can be downloaded from:
+http://curl.haxx.se/
+
+Uncomment the include $(BUILD_* lines from Android.mk depending on what you want to build.
+
+Run the following from the top dir:
+make libcurl curl
+adb remount
+adb push out/target/product/passion/system/bin/curl /system/bin/
+adb push /etc/ssl/certs/ca-certificates.crt /etc/ssl/certs/ (if you are on goobuntu)
+
+any questions, mail me: kristianm@google.com
+
+This is not intended to go into an release.
