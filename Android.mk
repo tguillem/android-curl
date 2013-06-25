@@ -57,42 +57,25 @@ CURL_HEADERS := \
 LOCAL_SRC_FILES := $(addprefix lib/,$(CSOURCES))
 LOCAL_C_INCLUDES := \
     $(LOCAL_PATH)/include \
-    external/openssl/include \
-    external/zlib
+    $(ANDROID_LIBS_PATH)/headers
 
 LOCAL_CFLAGS += $(common_CFLAGS)
+ifeq ($(TARGET_ARCH_ABI),x86)
+LOCAL_CFLAGS += -DBIONIC_NOSIGSETJMP # android ndk x86 bionic don't have sigsetjmp
+endif
 
 LOCAL_COPY_HEADERS_TO := libcurl/curl
 LOCAL_COPY_HEADERS := $(addprefix include/curl/,$(CURL_HEADERS))
-#LOCAL_SHARED_LIBRARIES := libz
 
-LOCAL_MODULE:= libcurl
+LOCAL_SHARED_LIBRARIES := libssl libcrypto
 
-#include $(BUILD_STATIC_LIBRARY)
-
-
-#########################
-# Build the curl binary
-
-include $(CLEAR_VARS)
-include $(LOCAL_PATH)/src/Makefile.inc
-LOCAL_SRC_FILES := $(addprefix src/,$(CURL_SOURCES))
+LOCAL_LDLIBS := -L$(LOCAL_PATH)/../android-libs/$(TARGET_ARCH)
+LOCAL_LDLIBS += -lz -lssl -lcrypto
 
 LOCAL_MODULE := curl
-LOCAL_STATIC_LIBRARIES := libcurl
-LOCAL_SYSTEM_SHARED_LIBRARIES := libc
 
-LOCAL_C_INCLUDES := \
-    $(LOCAL_PATH)/include \
-    $(LOCAL_PATH)/lib \
-    external/openssl/include \
-    external/zlib
+ifeq ($(TARGET_ARCH_ABI),armeabi-v7a)
+LOCAL_ARM_NEON:= true
+endif
 
-LOCAL_SHARED_LIBRARIES := libz libssl libcrypto
-
-# This will also need to include $(CURLX_ONES) in order to correctly build
-# a dynamic library
-LOCAL_CFLAGS += $(common_CFLAGS)
-
-#include $(BUILD_EXECUTABLE)
-
+include $(BUILD_SHARED_LIBRARY)
